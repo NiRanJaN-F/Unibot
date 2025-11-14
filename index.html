@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gemini Chat</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f1f1f1;
+        padding: 30px;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 480px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+      textarea {
+        width: 100%;
+        height: 130px;
+        margin-top: 10px;
+        padding: 10px;
+      }
+      button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+      #response {
+        white-space: pre-wrap;
+        margin-top: 20px;
+        padding: 10px;
+        background: #eee;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>UniBot — University Smart Assistant</h2>
+
+<label>Select UniBot Mode:</label>
+<select id="mode">
+  <option value="academic">Academic Expert</option>
+  <option value="study_buddy">Study Buddy</option>
+  <option value="tutor">Strict Tutor</option>
+  <option value="friendly">Friendly Assistant</option>
+  <option value="motivational">Motivational Coach</option>
+</select>
+
+<textarea id="prompt" placeholder="Ask UniBot anything..."></textarea>
+<button onclick="sendPrompt()">Send</button>
+
+
+      <div id="response"></div>
+    </div>
+
+    <script>
+      async function sendPrompt() {
+        const prompt = document.getElementById("prompt").value;
+        const responseBox = document.getElementById("response");
+
+        responseBox.innerHTML = "Thinking...";
+
+        const res = await fetch("/api/gemini", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+  prompt,
+  mode: document.getElementById("mode").value
+})
+
+        });
+
+        const data = await res.json();
+
+        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+          responseBox.innerHTML = data.candidates[0].content.parts[0].text;
+        } else {
+          responseBox.innerHTML = "Error: " + JSON.stringify(data);
+        }
+      }
+    </script>
+  </body>
+</html>
+
