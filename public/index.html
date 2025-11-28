@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>UniBot — Modern Chat UI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-hidden="false">
+      <div class="sidebarTop">
+        <div class="brand">UniBot</div>
+        <div class="spacer"></div>
+        <button id="sidebarCloseBtn" class="btn small" title="Close sidebar">✕</button>
+      </div>
+
+      <div class="controls">
+        <button id="newChatBtn" class="btn" id="newChatBtn">+ New Chat</button>
+        <div style="flex:1"></div>
+        <button id="themeToggle" class="btn small btn-ghost" title="Toggle theme">🌙</button>
+      </div>
+
+      <div class="userRow">
+        <div id="userInfo" class="small">Not signed in</div>
+        <div class="authRow">
+          <button id="loginBtn" class="btn small">Login (Google)</button>
+          <button id="logoutBtn" class="btn small" style="display:none;background:#ef4444">Logout</button>
+        </div>
+      </div>
+
+      <div style="margin-top:6px;font-weight:700;color:var(--text)">Chats</div>
+
+      <div id="sessions" class="sessions" aria-live="polite">
+        <div class="small no-sessions" style="padding:10px;color:var(--muted)">No chats yet — press "New Chat" to start</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main" id="mainContent">
+      <div class="panel" id="mainPanel">
+        <div class="topbar">
+          <select id="mode" aria-label="Mode selector">
+            <option value="academic">Academic Expert</option>
+            <option value="study_buddy">Study Buddy</option>
+            <option value="tutor">Strict Tutor</option>
+            <option value="friendly">Friendly Assistant</option>
+            <option value="motivational">Motivational Coach</option>
+          </select>
+
+          <div class="meta small" id="sessionMeta">Sign in to load chats</div>
+
+          <div style="margin-left:12px"></div>
+          <button id="clearChatBtn" class="btn btn-ghost small" title="Clear current chat" style="display:none;">🗑 Clear</button>
+          <button id="sidebarOpenDesktop" class="btn btn-ghost small" title="Open sessions" style="margin-left:auto">☰ Sessions</button>
+        </div>
+
+        <div id="chatArea" class="chatArea" role="log" aria-live="polite">
+          <div id="emptyHint" class="small" style="color:var(--muted);padding:20px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:16px;">👋</div>
+            <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);">Welcome to UniBot!</div>
+            <div style="margin-bottom:16px;">Start a new chat — sign in to save your conversation.</div>
+            <div style="font-size:14px;color:var(--muted-2);">
+              Try: <code style="background:var(--panel-2);padding:4px 8px;border-radius:6px;">/help</code> to see available commands
+            </div>
+          </div>
+          <div id="chatbox" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+
+        <div class="composer">
+          <textarea id="prompt" placeholder="Ask UniBot anything... (Press Enter to send, Shift+Enter for new line)" rows="2" spellcheck="false"></textarea>
+          <button id="stopBtn" class="stopBtn" style="display:none;" title="Stop generating">⏹ Stop</button>
+          <button id="sendBtn" class="sendBtn">Send</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase compat (unchanged) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="/script.js" defer></script>
+</body>
+</html>

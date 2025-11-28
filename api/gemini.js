@@ -1,6 +1,7 @@
 // api/gemini.js
 export default async function handler(req, res) {
   try {
+    // --- CORS ---
     if (req.method === "OPTIONS") {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -12,90 +13,99 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { prompt, mode } = req.body || {};
+    // --- Parse body ---
+    let bodyData = req.body;
+    if (!bodyData || typeof bodyData === "string") {
+      try { bodyData = JSON.parse(bodyData || "{}"); } catch (e) { bodyData = {}; }
+    }
 
-    if (!prompt || typeof prompt !== "string") {
+    const { prompt, mode, conversation = [] } = bodyData;
+
+    if (!prompt) {
       return res.status(400).json({ error: "Missing prompt" });
     }
 
-    // ensure API key present
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error("Missing GEMINI_API_KEY env var");
-      return res.status(500).json({ error: "Server misconfigured: missing API key" });
+      return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
     }
 
-    // choose the free-friendly flash model
     const model = "gemini-2.5-flash";
 
-    // simple mode instructions
+    // --- System styles ---
     const styles = {
-      academic: "Answer like a university-level academic expert. Use headings and bullet points when helpful.",
-      study_buddy: "Explain simply and kindly like a study buddy. Be encouraging.",
-      tutor: "Act as a strict tutor: ask guiding questions and show step-by-step reasoning.",
+      academic: "Answer like a university-level academic expert.",
+      study_buddy: "Explain simply and kindly like a study buddy.",
+      tutor: "Act as a strict tutor. Ask guiding questions.",
       friendly: "Be warm, concise, and helpful.",
       motivational: "Give motivational study advice and boost confidence."
     };
+
     const style = styles[mode] || styles.academic;
 
-    // Build request body according to Generative Language REST API (generateContent)
+    // -------------------------------
+    //  ✅ Limit conversation to last 20 messages
+    // -------------------------------
+    const trimmedConversation =
+      conversation.length > 20 ? conversation.slice(-20) : conversation;
+
+    // -------------------------------
+    //  Build message history
+    // -------------------------------
+    const historyParts = trimmedConversation.map(msg => {
+      if (msg.role === "user") return `User: ${msg.text}`;
+      if (msg.role === "bot") return `Bot: ${msg.text}`;
+      return "";
+    }).join("\n");
+
+    const finalInput = `
+${style}
+
+${historyParts}
+
+User: ${prompt}
+`.trim();
+
+    // Gemini body
     const body = {
       contents: [
         {
-          parts: [
-            { text: `System: ${style}` },
-            { text: `User: ${prompt}` }
-          ]
+          parts: [{ text: finalInput }]
         }
       ]
     };
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-    // Use fetch (Node 18+ on Vercel supports global fetch)
     const resp = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey
       },
-      body: JSON.stringify(body),
-      // no credentials; using API key header
+      body: JSON.stringify(body)
     });
 
-    const text = await resp.text();
+    const raw = await resp.text();
 
     if (!resp.ok) {
-      console.error("Gemini REST error", resp.status, text);
-      // return details but avoid leaking large internal info
-      return res.status(502).json({ error: "Bad response from Gemini API", status: resp.status, details: text });
+      return res.status(502).json({ error: raw });
     }
 
     let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.error("Failed to parse Gemini response", e, text);
-      return res.status(502).json({ error: "Invalid response from Gemini" });
-    }
+    try { data = JSON.parse(raw); } catch (e) { data = {}; }
 
-    // The response shape varies; attempt to extract text safely
-    let extracted = null;
-    // Try common path: data.candidates[0].content.parts[0].text OR data.output[0].content[0].text
-    if (Array.isArray(data?.candidates) && data.candidates[0]?.content?.parts?.[0]?.text) {
-      extracted = data.candidates[0].content.parts[0].text;
-    } else if (Array.isArray(data?.output) && data.output[0]?.content?.[0]?.text) {
-      extracted = data.output[0].content[0].text;
-    } else if (typeof data?.output?.[0]?.text === "string") {
-      extracted = data.output[0].text;
-    } else {
-      // fallback: stringify whole response
-      extracted = JSON.stringify(data);
-    }
+    let extracted =
+      data?.candidates?.[0]?.content?.[0]?.parts?.map(p => p.text).join("\n") ||
+      data?.candidates?.[0]?.content?.parts?.map(p => p.text).join("\n") ||
+      data?.candidates?.[0]?.content?.[0]?.text ||
+      "";
+
+    extracted = extracted?.trim() || "No response generated.";
 
     return res.status(200).json({ text: extracted });
+
   } catch (err) {
-    console.error("Server error in /api/gemini:", err);
-    return res.status(500).json({ error: err.message || String(err) });
+    return res.status(500).json({ error: err.message });
   }
 }
