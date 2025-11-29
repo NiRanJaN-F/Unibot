@@ -17,7 +17,7 @@
       </div>
 
       <div class="controls">
-        <button id="newChatBtn" class="btn" id="newChatBtn">+ New Chat</button>
+        <button id="newChatBtn" class="btn">+ New Chat</button>
         <div style="flex:1"></div>
         <button id="themeToggle" class="btn small btn-ghost" title="Toggle theme">🌙</button>
       </div>
@@ -52,6 +52,7 @@
           <div class="meta small" id="sessionMeta">Sign in to load chats</div>
 
           <div style="margin-left:12px"></div>
+          <button id="studentToolsBtn" class="btn btn-ghost small" title="Student Tools">📚 Student Tools</button>
           <button id="clearChatBtn" class="btn btn-ghost small" title="Clear current chat" style="display:none;">🗑 Clear</button>
           <button id="sidebarOpenDesktop" class="btn btn-ghost small" title="Open sessions" style="margin-left:auto">☰ Sessions</button>
         </div>
@@ -82,6 +83,98 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
+  <!-- Student Tools Modal -->
+  <div id="studentToolsModal" class="student-tools-modal" style="display:none;">
+    <div class="student-tools-modal-content">
+      <div class="student-tools-header">
+        <h2>📚 Student Tools</h2>
+        <button id="closeStudentTools" class="close-btn" title="Close">✕</button>
+      </div>
+      <div class="student-tools-tabs">
+        <button class="tool-tab active" data-tool="cgpa">Calculate CGPA</button>
+        <button class="tool-tab" data-tool="gpa">Calculate GPA</button>
+        <button class="tool-tab" data-tool="grade">Grade Converter</button>
+        <button class="tool-tab" data-tool="reminders">Reminders</button>
+        <button class="tool-tab" data-tool="planner">Study Planner</button>
+      </div>
+      <div class="student-tools-body">
+        <!-- CGPA Calculator -->
+        <div id="tool-cgpa" class="tool-panel active">
+          <h3>Calculate CGPA</h3>
+          <p class="tool-description">Enter your semester GPAs to calculate your Cumulative Grade Point Average</p>
+          <div id="cgpa-inputs"></div>
+          <button id="add-semester" class="btn-small">+ Add Semester</button>
+          <div class="result-box">
+            <div class="result-label">Your CGPA:</div>
+            <div id="cgpa-result" class="result-value">-</div>
+          </div>
+        </div>
+
+        <!-- GPA Calculator -->
+        <div id="tool-gpa" class="tool-panel">
+          <h3>Calculate GPA</h3>
+          <p class="tool-description">Enter your subjects with credits and grades to calculate GPA for a semester</p>
+          <div id="gpa-inputs"></div>
+          <button id="add-subject" class="btn-small">+ Add Subject</button>
+          <div class="result-box">
+            <div class="result-label">Your GPA:</div>
+            <div id="gpa-result" class="result-value">-</div>
+          </div>
+        </div>
+
+        <!-- Grade Converter -->
+        <div id="tool-grade" class="tool-panel">
+          <h3>Grade Converter</h3>
+          <p class="tool-description">Convert between different grading systems</p>
+          <div class="grade-converter">
+            <div class="converter-input">
+              <label>From:</label>
+              <select id="grade-from-system">
+                <option value="percentage">Percentage (%)</option>
+                <option value="cgpa10">CGPA (10 scale)</option>
+                <option value="cgpa4">CGPA (4 scale)</option>
+                <option value="letter">Letter Grade</option>
+              </select>
+              <input type="text" id="grade-input" placeholder="Enter value">
+            </div>
+            <div class="converter-output">
+              <label>To:</label>
+              <div id="grade-conversions"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reminders -->
+        <div id="tool-reminders" class="tool-panel">
+          <h3>Reminders</h3>
+          <p class="tool-description">Add and manage your study reminders</p>
+          <div class="reminder-form">
+            <input type="text" id="reminder-title" placeholder="Reminder title">
+            <textarea id="reminder-desc" placeholder="Description (optional)"></textarea>
+            <input type="datetime-local" id="reminder-date">
+            <button id="add-reminder" class="btn-primary">Add Reminder</button>
+          </div>
+          <div id="reminders-list" class="reminders-list"></div>
+        </div>
+
+        <!-- Study Planner -->
+        <div id="tool-planner" class="tool-panel">
+          <h3>Study Planner</h3>
+          <p class="tool-description">Plan your study schedule for the week</p>
+          <div class="planner-form">
+            <input type="text" id="planner-subject" placeholder="Subject name">
+            <input type="date" id="planner-date">
+            <input type="time" id="planner-time">
+            <input type="number" id="planner-duration" placeholder="Duration (hours)" min="0.5" step="0.5">
+            <button id="add-study-session" class="btn-primary">Add Session</button>
+          </div>
+          <div id="planner-calendar" class="planner-calendar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/script.js" defer></script>
+  <script src="/student-tools.js" defer></script>
 </body>
 </html>

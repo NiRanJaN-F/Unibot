@@ -711,46 +711,6 @@ async function regenerateResponse(container) {
       }
     }
   }
-
-  const msgIndex = conversation.findIndex(m => m._id === msgId);
-  if (msgIndex === -1 || msgIndex === 0) return;
-
-  // Find the previous user message
-  let userMsgIndex = msgIndex - 1;
-  while (userMsgIndex >= 0 && conversation[userMsgIndex].role !== 'user') {
-    userMsgIndex--;
-  }
-
-  if (userMsgIndex === -1) return;
-
-  const userPrompt = conversation[userMsgIndex].text;
-
-  // Remove the current bot message and any after it
-  const removeFromIndex = msgIndex;
-  for (let i = conversation.length - 1; i >= removeFromIndex; i--) {
-    const msg = conversation[i];
-    if (msg._id && currentUid) {
-      try {
-        await db.collection('users').doc(currentUid).collection('messages').doc(msg._id).delete();
-      } catch (e) {
-        console.error('Delete failed', e);
-      }
-    }
-    conversation.splice(i, 1);
-  }
-
-  // Remove from DOM
-  const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
-  const currentIndex = allContainers.indexOf(container);
-  if (currentIndex !== -1) {
-    for (let i = allContainers.length - 1; i >= currentIndex; i--) {
-      allContainers[i].remove();
-    }
-  }
-
-  // Resend the prompt
-  promptEl.value = userPrompt;
-  sendPrompt();
 }
 
 function copyToClipboard(text) {
