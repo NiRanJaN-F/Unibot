@@ -1,0 +1,263 @@
+{
+  "cse": {
+    "sem1": {
+      "subjects": [
+        {
+          "name": "Data Structures",
+          "pdfs": [
+            {
+              "title": "Introduction to Data Structures",
+              "url": "https://raw.githubusercontent.com/NiRanJaN-F/Unibot-notes/main/CSE/sem1/CN_Mod5.pptx.pdf ",
+              "size": "11.5 MB",
+              "type": "Lecture Notes"
+            },
+            {
+              "title": "Arrays and Linked Lists",
+              "url": "https://example.com/notes/cse/sem1/ds-arrays.pdf",
+              "size": "1.8 MB",
+              "type": "Lecture Notes"
+            },
+            {
+              "title": "Data Structures Assignment 1",
+              "url": "https://example.com/notes/cse/sem1/ds-assignment1.pdf",
+              "size": "0.5 MB",
+              "type": "Assignment"
+            }
+          ]
+        },
+        {
+          "name": "Programming in C",
+          "pdfs": [
+            {
+              "title": "C Programming Basics",
+              "url": "https://example.com/notes/cse/sem1/c-basics.pdf",
+              "size": "3.2 MB",
+              "type": "Lecture Notes"
+            },
+            {
+              "title": "Pointers and Memory Management",
+              "url": "https://example.com/notes/cse/sem1/c-pointers.pdf",
+              "size": "2.1 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem2": {
+      "subjects": [
+        {
+          "name": "Object Oriented Programming",
+          "pdfs": [
+            {
+              "title": "OOP Concepts",
+              "url": "https://example.com/notes/cse/sem2/oop-concepts.pdf",
+              "size": "2.8 MB",
+              "type": "Lecture Notes"
+            },
+            {
+              "title": "Java Programming",
+              "url": "https://example.com/notes/cse/sem2/java-basics.pdf",
+              "size": "3.5 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        },
+        {
+          "name": "Database Management Systems",
+          "pdfs": [
+            {
+              "title": "SQL Fundamentals",
+              "url": "https://example.com/notes/cse/sem2/sql-fundamentals.pdf",
+              "size": "2.3 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem3": {
+      "subjects": [
+        {
+          "name": "Operating Systems",
+          "pdfs": [
+            {
+              "title": "OS Introduction",
+              "url": "https://example.com/notes/cse/sem3/os-intro.pdf",
+              "size": "3.1 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem4": {
+      "subjects": [
+        {
+          "name": "Computer Networks",
+          "pdfs": [
+            {
+              "title": "Network Protocols",
+              "url": "https://example.com/notes/cse/sem4/networks.pdf",
+              "size": "2.7 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "ece": {
+    "sem1": {
+      "subjects": [
+        {
+          "name": "Digital Electronics",
+          "pdfs": [
+            {
+              "title": "Logic Gates and Boolean Algebra",
+              "url": "https://example.com/notes/ece/sem1/digital-logic.pdf",
+              "size": "2.4 MB",
+              "type": "Lecture Notes"
+            },
+            {
+              "title": "Combinational Circuits",
+              "url": "https://example.com/notes/ece/sem1/combinational.pdf",
+              "size": "1.9 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        },
+        {
+          "name": "Basic Electronics",
+          "pdfs": [
+            {
+              "title": "Semiconductor Physics",
+              "url": "https://example.com/notes/ece/sem1/semiconductors.pdf",
+              "size": "3.0 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem2": {
+      "subjects": [
+        {
+          "name": "Signals and Systems",
+          "pdfs": [
+            {
+              "title": "Signal Processing Basics",
+              "url": "https://example.com/notes/ece/sem2/signals.pdf",
+              "size": "2.6 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem3": {
+      "subjects": [
+        {
+          "name": "Communication Systems",
+          "pdfs": [
+            {
+              "title": "Analog Communication",
+              "url": "https://example.com/notes/ece/sem3/analog-comm.pdf",
+              "size": "2.9 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem4": {
+      "subjects": [
+        {
+          "name": "Microprocessors",
+          "pdfs": [
+            {
+              "title": "8086 Microprocessor",
+              "url": "https://example.com/notes/ece/sem4/microprocessor.pdf",
+              "size": "3.2 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "ise": {
+    "sem1": {
+      "subjects": [
+        {
+          "name": "Information Systems",
+          "pdfs": [
+            {
+              "title": "Introduction to IS",
+              "url": "https://example.com/notes/ise/sem1/is-intro.pdf",
+              "size": "2.2 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        },
+        {
+          "name": "Database Concepts",
+          "pdfs": [
+            {
+              "title": "Database Design",
+              "url": "https://example.com/notes/ise/sem1/db-design.pdf",
+              "size": "2.5 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem2": {
+      "subjects": [
+        {
+          "name": "Data Mining",
+          "pdfs": [
+            {
+              "title": "Data Mining Fundamentals",
+              "url": "https://example.com/notes/ise/sem2/data-mining.pdf",
+              "size": "2.8 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem3": {
+      "subjects": [
+        {
+          "name": "Business Intelligence",
+          "pdfs": [
+            {
+              "title": "BI Concepts and Tools",
+              "url": "https://example.com/notes/ise/sem3/bi-concepts.pdf",
+              "size": "3.1 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    },
+    "sem4": {
+      "subjects": [
+        {
+          "name": "Enterprise Systems",
+          "pdfs": [
+            {
+              "title": "ERP Systems",
+              "url": "https://example.com/notes/ise/sem4/erp.pdf",
+              "size": "2.7 MB",
+              "type": "Lecture Notes"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+

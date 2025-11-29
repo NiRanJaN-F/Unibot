@@ -96,6 +96,7 @@
         <button class="tool-tab" data-tool="grade">Grade Converter</button>
         <button class="tool-tab" data-tool="reminders">Reminders</button>
         <button class="tool-tab" data-tool="planner">Study Planner</button>
+        <button class="tool-tab" data-tool="pdfnotes">PDF Notes</button>
       </div>
       <div class="student-tools-body">
         <!-- CGPA Calculator -->
@@ -169,6 +170,24 @@
             <button id="add-study-session" class="btn-primary">Add Session</button>
           </div>
           <div id="planner-calendar" class="planner-calendar"></div>
+        </div>
+
+        <!-- PDF Notes -->
+        <div id="tool-pdfnotes" class="tool-panel">
+          <h3>PDF Notes</h3>
+          <p class="tool-description">Browse and download study materials by branch and semester</p>
+          <div class="pdf-filters">
+            <select id="pdf-branch-select">
+              <option value="">Select Branch</option>
+              <option value="cse">CSE</option>
+              <option value="ece">ECE</option>
+              <option value="ise">ISE</option>
+            </select>
+            <select id="pdf-semester-select">
+              <option value="">Select Semester</option>
+            </select>
+          </div>
+          <div id="pdf-notes-list" class="pdf-notes-list"></div>
         </div>
       </div>
     </div>

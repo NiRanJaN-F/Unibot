@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGradeConverter();
   initReminders();
   initStudyPlanner();
+  initPDFNotes();
 });
 
 function openStudentTools() {
@@ -591,6 +592,176 @@ function formatTime(time) {
   return `${displayHour}:${minutes} ${ampm}`;
 }
 
+/* ===========================================================
+   PDF NOTES
+   =========================================================== */
+let pdfNotesData = null;
+
+function initPDFNotes() {
+  const branchSelect = document.getElementById('pdf-branch-select');
+  const semesterSelect = document.getElementById('pdf-semester-select');
+  
+  if (!branchSelect || !semesterSelect) return;
+  
+  // Load PDF notes data
+  loadPDFNotes();
+  
+  // Branch selection handler
+  branchSelect.addEventListener('change', (e) => {
+    const branch = e.target.value;
+    updateSemesterDropdown(branch);
+    if (branch && semesterSelect.value) {
+      renderPDFNotes(branch, semesterSelect.value);
+    } else {
+      clearPDFNotesList();
+    }
+  });
+  
+  // Semester selection handler
+  semesterSelect.addEventListener('change', (e) => {
+    const semester = e.target.value;
+    const branch = branchSelect.value;
+    if (branch && semester) {
+      renderPDFNotes(branch, semester);
+    } else {
+      clearPDFNotesList();
+    }
+  });
+}
+
+async function loadPDFNotes() {
+  try {
+    const response = await fetch('/notes-data.json');
+    if (!response.ok) {
+      throw new Error('Failed to load PDF notes data');
+    }
+    pdfNotesData = await response.json();
+  } catch (error) {
+    console.error('Error loading PDF notes:', error);
+    const listEl = document.getElementById('pdf-notes-list');
+    if (listEl) {
+      listEl.innerHTML = '<div class="pdf-error">Failed to load PDF notes. Please try again later.</div>';
+    }
+  }
+}
+
+function updateSemesterDropdown(branch) {
+  const semesterSelect = document.getElementById('pdf-semester-select');
+  if (!semesterSelect || !pdfNotesData || !branch) {
+    return;
+  }
+  
+  // Clear existing options except the first one
+  semesterSelect.innerHTML = '<option value="">Select Semester</option>';
+  
+  // Get available semesters for the selected branch
+  const branchData = pdfNotesData[branch];
+  if (branchData) {
+    const semesters = Object.keys(branchData).sort();
+    semesters.forEach(sem => {
+      const option = document.createElement('option');
+      option.value = sem;
+      option.textContent = `Semester ${sem.replace('sem', '')}`;
+      semesterSelect.appendChild(option);
+    });
+  }
+}
+
+function renderPDFNotes(branch, semester) {
+  const listEl = document.getElementById('pdf-notes-list');
+  if (!listEl || !pdfNotesData || !branch || !semester) {
+    return;
+  }
+  
+  const branchData = pdfNotesData[branch];
+  if (!branchData || !branchData[semester]) {
+    listEl.innerHTML = '<div class="pdf-empty">No PDF notes available for this selection.</div>';
+    return;
+  }
+  
+  const semesterData = branchData[semester];
+  const subjects = semesterData.subjects || [];
+  
+  if (subjects.length === 0) {
+    listEl.innerHTML = '<div class="pdf-empty">No PDF notes available for this selection.</div>';
+    return;
+  }
+  
+  let html = '';
+  
+  subjects.forEach(subject => {
+    html += `
+      <div class="pdf-subject-group">
+        <div class="pdf-subject-header">
+          <h4>${escapeHtml(subject.name)}</h4>
+        </div>
+        <div class="pdf-cards">
+    `;
+    
+    subject.pdfs.forEach(pdf => {
+      html += `
+        <div class="pdf-note-card">
+          <div class="pdf-card-icon">📄</div>
+          <div class="pdf-card-content">
+            <div class="pdf-card-title">${escapeHtml(pdf.title)}</div>
+            <div class="pdf-card-meta">
+              <span class="pdf-card-type">${escapeHtml(pdf.type || 'PDF')}</span>
+              ${pdf.size ? `<span class="pdf-card-size">${escapeHtml(pdf.size)}</span>` : ''}
+            </div>
+          </div>
+          <div class="pdf-actions">
+            <button class="pdf-btn pdf-btn-view" onclick="viewPDF('${escapeHtml(pdf.url)}')" title="View PDF">
+              👁️ View
+            </button>
+            <button class="pdf-btn pdf-btn-download" onclick="downloadPDF('${escapeHtml(pdf.url)}', '${escapeHtml(pdf.title)}.pdf')" title="Download PDF">
+              ⬇️ Download
+            </button>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+  
+  listEl.innerHTML = html;
+}
+
+function clearPDFNotesList() {
+  const listEl = document.getElementById('pdf-notes-list');
+  if (listEl) {
+    listEl.innerHTML = '<div class="pdf-empty">Select a branch and semester to view PDF notes.</div>';
+  }
+}
+
+function viewPDF(url) {
+  if (!url) {
+    alert('PDF URL not available');
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function downloadPDF(url, filename) {
+  if (!url) {
+    alert('PDF URL not available');
+    return;
+  }
+  
+  // Create a temporary anchor element to trigger download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || 'notes.pdf';
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 // Make functions globally available for onclick handlers
 window.removeSemester = removeSemester;
 window.removeSubject = removeSubject;
@@ -598,4 +769,6 @@ window.removeReminder = removeReminder;
 window.toggleReminder = toggleReminder;
 window.removeStudySession = removeStudySession;
 window.toggleStudySession = toggleStudySession;
+window.viewPDF = viewPDF;
+window.downloadPDF = downloadPDF;
 
