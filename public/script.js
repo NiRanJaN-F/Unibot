@@ -192,7 +192,7 @@ const timetableDB = {
 function getTimetableForToday(branch = null, classNum = null) {
   const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   const todayKey = days[new Date().getDay()];
-  
+
   // If branch and class specified, get specific timetable
   if (branch && classNum) {
     const branchData = timetableDB[branch.toLowerCase()];
@@ -204,29 +204,29 @@ function getTimetableForToday(branch = null, classNum = null) {
       return `⚠️ Class "${classNum}" not found for branch "${branch}". Available classes: 1, 2`;
     }
     const todayList = classData[todayKey] || [];
-    
+
     if (todayList.length === 0) {
       return `📅 **${branch.toUpperCase()} - Class ${classNum} - ${todayKey.toUpperCase()}**\n\nNo classes today — enjoy your day!`;
     }
-    
+
     let output = `📅 **${branch.toUpperCase()} - Class ${classNum} - ${todayKey.toUpperCase()}**\n\n`;
     todayList.forEach(item => {
       output += `⏰ ${item.time}\n📚 ${item.subject}\n👨‍🏫 ${item.faculty}\n🏢 ${item.room}\n\n`;
     });
     return output;
   }
-  
+
   // Default: show all branches summary
   let output = `📅 **Today's Timetable Summary (${todayKey.toUpperCase()})**\n\n`;
   let hasClasses = false;
-  
+
   Object.keys(timetableDB).forEach(branchKey => {
     const branchName = branchKey.toUpperCase();
     ['class1', 'class2'].forEach(classKey => {
       const classNum = classKey.replace('class', '');
       const classData = timetableDB[branchKey][classKey];
       const todayList = classData[todayKey] || [];
-      
+
       if (todayList.length > 0) {
         hasClasses = true;
         output += `\n**${branchName} - Class ${classNum}:**\n`;
@@ -236,11 +236,11 @@ function getTimetableForToday(branch = null, classNum = null) {
       }
     });
   });
-  
+
   if (!hasClasses) {
     return `📅 **${todayKey.toUpperCase()}**\n\nNo classes today — enjoy your day!`;
   }
-  
+
   return output;
 }
 
@@ -249,22 +249,22 @@ function getTimetableForBranch(branch, day = null) {
   if (!branchData) {
     return `⚠️ Branch "${branch}" not found. Available branches: CSE, ECE, ISE`;
   }
-  
+
   const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   const targetDay = day ? day.toLowerCase() : days[new Date().getDay()];
-  
+
   if (!days.includes(targetDay)) {
     return `⚠️ Invalid day. Available days: ${days.join(', ')}`;
   }
-  
+
   let output = `📅 **${branch.toUpperCase()} Timetable - ${targetDay.toUpperCase()}**\n\n`;
   let hasClasses = false;
-  
+
   ['class1', 'class2'].forEach(classKey => {
     const classNum = classKey.replace('class', '');
     const classData = branchData[classKey];
     const dayList = classData[targetDay] || [];
-    
+
     if (dayList.length > 0) {
       hasClasses = true;
       output += `\n**Class ${classNum}:**\n`;
@@ -273,11 +273,11 @@ function getTimetableForBranch(branch, day = null) {
       });
     }
   });
-  
+
   if (!hasClasses) {
     return `📅 **${branch.toUpperCase()} - ${targetDay.toUpperCase()}**\n\nNo classes scheduled.`;
   }
-  
+
   return output;
 }
 
@@ -285,7 +285,7 @@ function searchFaculty(nameQuery) {
   if (!nameQuery || nameQuery.trim() === '') {
     return `⚠️ Please provide a faculty name to search.\n\nUsage: /faculty <name>\nExample: /faculty balaji`;
   }
-  
+
   const q = nameQuery.toLowerCase().trim();
   const results = facultyDB.filter(f =>
     f.name.toLowerCase().includes(q) ||
@@ -362,18 +362,18 @@ let abortController = null;
 let currentBotMessageEl = null;
 
 /* ========== Helpers ========== */
-function uidShort(u){ return u ? (u.slice(0,6) + '...' + u.slice(-4)) : ''; }
-function fmtDateLabel(ts){
-  if(!ts) return '';
+function uidShort(u) { return u ? (u.slice(0, 6) + '...' + u.slice(-4)) : ''; }
+function fmtDateLabel(ts) {
+  if (!ts) return '';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   const today = new Date(), yesterday = new Date(Date.now() - 86400000);
   if (d.toDateString() === today.toDateString()) return 'Today';
   if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
   return d.toLocaleDateString();
 }
-function escapeHtml(s){
-  if(!s) return '';
-  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 /* ========== Rendering helpers ========== */
@@ -382,154 +382,203 @@ function createMsgElement(role, text, msgId = null, timestamp = null) {
   container.className = 'message-container';
   container.dataset.role = role;
   if (msgId) container.dataset.msgId = msgId;
-  
-  const el = document.createElement('div');
-  el.className = 'msg ' + (role === 'user' ? 'user' : 'bot') + ' enter';
-  el.textContent = text || '';
-  
+
+  const msgEl = document.createElement('div');
+  msgEl.className = `msg ${role}`;
+  msgEl.textContent = text;
+  container.appendChild(msgEl);
+
   // Add message actions
   const actions = document.createElement('div');
   actions.className = 'message-actions';
-  
+
   if (role === 'user') {
-    // Edit button for user messages
     const editBtn = document.createElement('button');
-    editBtn.className = 'msg-action-btn';
-    editBtn.innerHTML = '✏️';
-    editBtn.title = 'Edit message';
+    editBtn.className = 'msg-action-btn edit-btn';
+    editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
+    editBtn.setAttribute('data-tooltip', 'Edit message');
     editBtn.onclick = (e) => {
       e.stopPropagation();
       editUserMessage(container, text);
     };
     actions.appendChild(editBtn);
   } else {
-    // Regenerate button for bot messages (only if message is complete)
-    if (text && text.trim()) {
-      const regenBtn = document.createElement('button');
-      regenBtn.className = 'msg-action-btn';
-      regenBtn.innerHTML = '🔄';
-      regenBtn.title = 'Regenerate response';
-      regenBtn.onclick = (e) => {
-        e.stopPropagation();
-        regenerateResponse(container);
-      };
-      actions.appendChild(regenBtn);
-    }
-  }
-  
-  // Copy button for all messages
-  if (text && text.trim()) {
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'msg-action-btn';
-    copyBtn.innerHTML = '📋';
-    copyBtn.title = 'Copy message';
-    copyBtn.onclick = (e) => {
+    const regenerateBtn = document.createElement('button');
+    regenerateBtn.className = 'msg-action-btn regenerate-btn';
+    regenerateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
+    regenerateBtn.setAttribute('data-tooltip', 'Regenerate response');
+    regenerateBtn.onclick = (e) => {
       e.stopPropagation();
-      copyToClipboard(text);
-      copyBtn.innerHTML = '✓';
-      copyBtn.title = 'Copied!';
-      setTimeout(() => {
-        copyBtn.innerHTML = '📋';
-        copyBtn.title = 'Copy message';
-      }, 2000);
+      regenerateResponse(container);
     };
-    actions.appendChild(copyBtn);
+    actions.appendChild(regenerateBtn);
   }
-  
-  // Timestamp
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'msg-action-btn copy-btn';
+  copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+  copyBtn.setAttribute('data-tooltip', 'Copy to clipboard');
+  copyBtn.onclick = (e) => {
+    e.stopPropagation();
+    copyToClipboard(text);
+
+    // Show copied feedback
+    const originalTitle = copyBtn.getAttribute('data-tooltip');
+    copyBtn.setAttribute('data-tooltip', 'Copied!');
+    copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+    setTimeout(() => {
+      copyBtn.setAttribute('data-tooltip', originalTitle);
+      copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+    }, 2000);
+  };
+  actions.appendChild(copyBtn);
+
+  // Add timestamp if available
   if (timestamp) {
     const timeEl = document.createElement('div');
     timeEl.className = 'message-time';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    timeEl.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    timeEl.textContent = fmtDateLabel(timestamp);
     container.appendChild(timeEl);
   }
-  
-  container.appendChild(el);
-  if (actions.children.length > 0) {
-    container.appendChild(actions);
-  }
-  
+
+  container.appendChild(actions);
   return container;
 }
 
 function editUserMessage(container, currentText) {
   const msgEl = container.querySelector('.msg');
   if (!msgEl) return;
-  
+
   const originalText = msgEl.textContent;
   const msgId = container.dataset.msgId;
-  
+
+  // Create input with improved styling
   const input = document.createElement('textarea');
   input.value = originalText;
   input.className = 'msg-edit-input';
-  input.style.cssText = 'width:100%;max-width:75%;padding:8px;border-radius:8px;border:2px solid var(--accent);background:var(--panel);color:var(--text);font-size:14px;resize:vertical;min-height:60px;';
-  
-  msgEl.replaceWith(input);
-  input.focus();
-  input.select();
-  
+
+  // Replace message with input
+  msgEl.style.display = 'none';
+  msgEl.after(input);
+
+  // Create button container
   const btnContainer = document.createElement('div');
-  btnContainer.style.cssText = 'display:flex;gap:8px;margin-top:8px;max-width:75%;';
-  
+  btnContainer.className = 'msg-edit-buttons';
+
+  // Create save button with icon
   const saveBtn = document.createElement('button');
-  saveBtn.textContent = 'Save';
-  saveBtn.className = 'btn small';
-  
+  saveBtn.className = 'btn btn-primary small';
+  saveBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Save
+  `;
+
+  // Create cancel button with icon
   const cancelBtn = document.createElement('button');
-  cancelBtn.textContent = 'Cancel';
-  cancelBtn.className = 'btn small btn-ghost';
-  
+  cancelBtn.className = 'btn btn-ghost small';
+  cancelBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+    Cancel
+  `;
+
   btnContainer.appendChild(saveBtn);
   btnContainer.appendChild(cancelBtn);
-  
-  container.appendChild(btnContainer);
-  
+
+  // Insert buttons after input
+  input.after(btnContainer);
+
+  // Focus and select all text
+  input.focus();
+  input.select();
+
+  // Save edit function
   const saveEdit = async () => {
     const newText = input.value.trim();
     if (newText && newText !== originalText) {
-      // Update in Firestore
-      if (currentUid && msgId) {
-        try {
+      // Show loading state
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `
+        <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1v3m0 16v3m9-9h-3m-16 0H1m15.4-6.4l-2.1 2.1M5.7 19.8l-2.1 2.1M18.3 5.7l2.1-2.1M5.7 5.7l-2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+          </path>
+        </svg>
+        Saving...
+      `;
+
+      try {
+        // Update in Firestore
+        if (currentUid && msgId) {
           await db.collection('users').doc(currentUid).collection('messages').doc(msgId).update({
-            text: newText
+            text: newText,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-        } catch(e) {
-          console.error('Update failed', e);
         }
+
+        // Update in conversation array
+        const msgIndex = conversation.findIndex(m => m._id === msgId);
+        if (msgIndex !== -1) {
+          conversation[msgIndex].text = newText;
+        }
+
+        // Update UI
+        msgEl.textContent = newText;
+        input.remove();
+        btnContainer.remove();
+        msgEl.style.display = '';
+      } catch (e) {
+        console.error('Update failed', e);
+        saveBtn.innerHTML = 'Error! Retry';
+        saveBtn.disabled = false;
       }
-      // Update in conversation array
-      const msgIndex = conversation.findIndex(m => m._id === msgId);
-      if (msgIndex !== -1) {
-        conversation[msgIndex].text = newText;
-      }
-      // Update UI
-      const newMsgEl = document.createElement('div');
-      newMsgEl.className = 'msg user';
-      newMsgEl.textContent = newText;
-      input.replaceWith(newMsgEl);
-      btnContainer.remove();
     } else {
-      input.replaceWith(msgEl);
-      btnContainer.remove();
+      // No changes or empty text, just cancel
+      cancelEdit();
     }
   };
-  
-  saveBtn.onclick = saveEdit;
-  cancelBtn.onclick = () => {
-    input.replaceWith(msgEl);
+
+  // Cancel edit function
+  const cancelEdit = () => {
+    input.remove();
     btnContainer.remove();
+    msgEl.style.display = '';
   };
-  
+
+  // Event listeners
+  saveBtn.onclick = saveEdit;
+  cancelBtn.onclick = cancelEdit;
+
+  // Handle keyboard shortcuts
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       saveEdit();
     } else if (e.key === 'Escape') {
-      input.replaceWith(msgEl);
-      btnContainer.remove();
+      e.preventDefault();
+      cancelEdit();
     }
   });
+
+  // Close on click outside
+  const handleClickOutside = (e) => {
+    if (!input.contains(e.target) && !btnContainer.contains(e.target)) {
+      cancelEdit();
+      document.removeEventListener('click', handleClickOutside);
+    }
+  };
+
+  // Add slight delay to prevent immediate close when clicking the edit button
+  setTimeout(() => {
+    document.addEventListener('click', handleClickOutside);
+  }, 100);
 }
 
 async function regenerateResponse(container) {
@@ -540,20 +589,20 @@ async function regenerateResponse(container) {
     const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
     const currentIndex = allContainers.indexOf(container);
     if (currentIndex === -1 || currentIndex === 0) return;
-    
+
     // Find previous user message
     let userIndex = currentIndex - 1;
     while (userIndex >= 0 && allContainers[userIndex].dataset.role !== 'user') {
       userIndex--;
     }
     if (userIndex === -1) return;
-    
+
     const userContainer = allContainers[userIndex];
     const userMsgEl = userContainer.querySelector('.msg');
     if (!userMsgEl) return;
-    
+
     const userPrompt = userMsgEl.textContent;
-    
+
     // Remove current bot message and any messages after it
     const removeIndex = currentIndex;
     for (let i = allContainers.length - 1; i >= removeIndex; i--) {
@@ -566,33 +615,33 @@ async function regenerateResponse(container) {
         if (currentUid) {
           try {
             await db.collection('users').doc(currentUid).collection('messages').doc(cont.dataset.msgId).delete();
-          } catch(e) {
+          } catch (e) {
             console.error('Delete failed', e);
           }
         }
       }
       cont.remove();
     }
-    
+
     // Resend the prompt
     promptEl.value = userPrompt;
     sendPrompt();
     return;
   }
-  
+
   const msgIndex = conversation.findIndex(m => m._id === msgId);
   if (msgIndex === -1 || msgIndex === 0) return;
-  
+
   // Find the previous user message
   let userMsgIndex = msgIndex - 1;
   while (userMsgIndex >= 0 && conversation[userMsgIndex].role !== 'user') {
     userMsgIndex--;
   }
-  
+
   if (userMsgIndex === -1) return;
-  
+
   const userPrompt = conversation[userMsgIndex].text;
-  
+
   // Remove the current bot message and any after it
   const removeFromIndex = msgIndex;
   for (let i = conversation.length - 1; i >= removeFromIndex; i--) {
@@ -600,13 +649,13 @@ async function regenerateResponse(container) {
     if (msg._id && currentUid) {
       try {
         await db.collection('users').doc(currentUid).collection('messages').doc(msg._id).delete();
-      } catch(e) {
+      } catch (e) {
         console.error('Delete failed', e);
       }
     }
     conversation.splice(i, 1);
   }
-  
+
   // Remove from DOM
   const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
   const currentIndex = allContainers.indexOf(container);
@@ -615,7 +664,7 @@ async function regenerateResponse(container) {
       allContainers[i].remove();
     }
   }
-  
+
   // Resend the prompt
   promptEl.value = userPrompt;
   sendPrompt();
@@ -682,7 +731,7 @@ function appendTypingIndicator() {
 function replaceTypingWithBot() {
   const t = document.getElementById('typingIndicator');
   if (!t) return null;
-  const botContainer = createMsgElement('bot','');
+  const botContainer = createMsgElement('bot', '');
   t.replaceWith(botContainer);
   chatbox.scrollTop = chatbox.scrollHeight;
   return botContainer;
@@ -691,24 +740,24 @@ function replaceTypingWithBot() {
 /* ========== Sessions: listening & rendering ========== */
 function listenForSessions(uid) {
   if (sessionsUnsubscribe) { sessionsUnsubscribe(); sessionsUnsubscribe = null; }
-  const col = db.collection('users').doc(uid).collection('messages').orderBy('createdAt','desc');
+  const col = db.collection('users').doc(uid).collection('messages').orderBy('createdAt', 'desc');
   sessionsUnsubscribe = col.onSnapshot(snap => {
     const map = new Map();
     snap.forEach(doc => {
       const d = doc.data();
       const sid = d.sessionId || 'default';
       if (!map.has(sid)) {
-        map.set(sid, { sessionId: sid, lastText: d.text || '', lastAt: d.createdAt || null, count:1 });
+        map.set(sid, { sessionId: sid, lastText: d.text || '', lastAt: d.createdAt || null, count: 1 });
       } else {
         const it = map.get(sid);
-        it.count = (it.count||0) + 1;
+        it.count = (it.count || 0) + 1;
         if (!it.lastAt || (d.createdAt && d.createdAt.seconds > it.lastAt.seconds)) {
           it.lastAt = d.createdAt;
           it.lastText = d.text || it.lastText;
         }
       }
     });
-    sessions = Array.from(map.values()).sort((a,b)=>{
+    sessions = Array.from(map.values()).sort((a, b) => {
       const ta = a.lastAt ? a.lastAt.seconds : 0;
       const tb = b.lastAt ? b.lastAt.seconds : 0;
       return tb - ta;
@@ -718,9 +767,9 @@ function listenForSessions(uid) {
   }, err => console.error('sessions listen err', err));
 }
 
-function renderSessions(){
+function renderSessions() {
   sessionsEl.innerHTML = '';
-  if(!sessions || sessions.length === 0){
+  if (!sessions || sessions.length === 0) {
     const p = document.createElement('div');
     p.className = 'small';
     p.style.color = 'var(--muted)';
@@ -732,22 +781,22 @@ function renderSessions(){
   sessions.forEach(s => {
     const item = document.createElement('div');
     item.className = 'sessionItem' + (s.sessionId === currentSessionId ? ' active' : '');
-    
+
     const left = document.createElement('div');
     left.style.flex = '1';
     left.style.cursor = 'pointer';
     left.innerHTML = `<div class="sessionTitle">${s.sessionId === 'default' ? 'General' : s.sessionId}</div>
-                      <div class="sessionPreview">${escapeHtml(s.lastText || '').slice(0,80) || 'No messages yet'}</div>`;
-    left.onclick = ()=> selectSession(s.sessionId);
-    
+                      <div class="sessionPreview">${escapeHtml(s.lastText || '').slice(0, 80) || 'No messages yet'}</div>`;
+    left.onclick = () => selectSession(s.sessionId);
+
     const right = document.createElement('div');
-    right.style.minWidth = '100px'; 
+    right.style.minWidth = '100px';
     right.style.textAlign = 'right';
     right.style.display = 'flex';
     right.style.flexDirection = 'column';
     right.style.gap = '4px';
-    right.innerHTML = `<div class="sessionPreviewSmall">${s.lastAt ? fmtDateLabel(s.lastAt) : ''}</div><div style="font-size:12px;color:var(--muted)">${s.count||0} msgs</div>`;
-    
+    right.innerHTML = `<div class="sessionPreviewSmall">${s.lastAt ? fmtDateLabel(s.lastAt) : ''}</div><div style="font-size:12px;color:var(--muted)">${s.count || 0} msgs</div>`;
+
     // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'session-delete-btn';
@@ -758,8 +807,8 @@ function renderSessions(){
       deleteSession(s.sessionId);
     };
     right.appendChild(deleteBtn);
-    
-    item.appendChild(left); 
+
+    item.appendChild(left);
     item.appendChild(right);
     sessionsEl.appendChild(item);
   });
@@ -767,36 +816,36 @@ function renderSessions(){
 
 async function deleteSession(sessionId) {
   if (!currentUid || !sessionId) return;
-  
+
   if (!confirm(`Are you sure you want to delete this chat? This action cannot be undone.`)) {
     return;
   }
-  
+
   try {
     // Get all messages in this session
     const messagesRef = db.collection('users').doc(currentUid).collection('messages')
       .where('sessionId', '==', sessionId);
     const snapshot = await messagesRef.get();
-    
+
     // Delete all messages
     const batch = db.batch();
     snapshot.forEach(doc => {
       batch.delete(doc.ref);
     });
     await batch.commit();
-    
+
     // If this was the current session, create a new one
     if (sessionId === currentSessionId) {
       newSession();
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Delete session failed', e);
     alert('Failed to delete chat. Please try again.');
   }
 }
 
 /* ========== Session management ========== */
-function newSession(){
+function newSession() {
   stopGeneration();
   const sid = 's_' + Date.now();
   currentSessionId = sid;
@@ -808,57 +857,57 @@ function newSession(){
 
 async function clearCurrentChat() {
   if (!currentUid || !currentSessionId) return;
-  
+
   if (!confirm('Are you sure you want to clear this chat? All messages will be deleted.')) {
     return;
   }
-  
+
   stopGeneration();
-  
+
   try {
     // Delete all messages in current session
     const messagesRef = db.collection('users').doc(currentUid).collection('messages')
       .where('sessionId', '==', currentSessionId);
     const snapshot = await messagesRef.get();
-    
+
     const batch = db.batch();
     snapshot.forEach(doc => {
       batch.delete(doc.ref);
     });
     await batch.commit();
-    
+
     conversation = [];
     renderConversation(conversation);
-  } catch(e) {
+  } catch (e) {
     console.error('Clear chat failed', e);
     alert('Failed to clear chat. Please try again.');
   }
 }
 
-async function selectSession(sid){
-  if(!currentUid) return;
-  if(unsubscribeMessages){ unsubscribeMessages(); unsubscribeMessages = null; }
+async function selectSession(sid) {
+  if (!currentUid) return;
+  if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
   currentSessionId = sid;
   sessionMeta.textContent = `Session: ${sid === 'default' ? 'General' : sid}`;
   const q = db.collection('users').doc(currentUid).collection('messages')
-              .where('sessionId','==', sid).orderBy('createdAt','asc');
-  unsubscribeMessages = q.onSnapshot(snap=>{
+    .where('sessionId', '==', sid).orderBy('createdAt', 'asc');
+  unsubscribeMessages = q.onSnapshot(snap => {
     const conv = [];
-    snap.forEach(doc=>{
+    snap.forEach(doc => {
       const d = doc.data();
-      conv.push({ role: d.role||'bot', text: d.text||'', createdAt: d.createdAt || null, _id: doc.id });
+      conv.push({ role: d.role || 'bot', text: d.text || '', createdAt: d.createdAt || null, _id: doc.id });
     });
     conversation = conv;
     renderConversation(conversation);
-  }, async (err)=>{
+  }, async (err) => {
     console.warn('session query err, falling back', err);
-    const allRef = db.collection('users').doc(currentUid).collection('messages').orderBy('createdAt','asc');
+    const allRef = db.collection('users').doc(currentUid).collection('messages').orderBy('createdAt', 'asc');
     const allSnap = await allRef.get();
     const conv = [];
-    allSnap.forEach(doc=>{
+    allSnap.forEach(doc => {
       const d = doc.data();
       const sidDoc = d.sessionId || 'default';
-      if(sidDoc === sid) conv.push({ role: d.role||'bot', text: d.text||'', createdAt: d.createdAt || null, _id: doc.id });
+      if (sidDoc === sid) conv.push({ role: d.role || 'bot', text: d.text || '', createdAt: d.createdAt || null, _id: doc.id });
     });
     conversation = conv;
     renderConversation(conversation);
@@ -866,38 +915,38 @@ async function selectSession(sid){
 }
 
 /* ========== Save to Firestore ========== */
-async function saveMessage(role, text){
-  if(!currentUid || !currentSessionId) return;
-  try{
+async function saveMessage(role, text) {
+  if (!currentUid || !currentSessionId) return;
+  try {
     await db.collection('users').doc(currentUid).collection('messages').add({
       role, text, sessionId: currentSessionId, createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-  } catch(e){ console.error('save msg err', e); }
+  } catch (e) { console.error('save msg err', e); }
 }
 
 /* ========== Auth & UI wiring ========== */
-loginBtn.addEventListener('click', async ()=>{
+loginBtn.addEventListener('click', async () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  try{
+  try {
     const result = await auth.signInWithPopup(provider);
     const user = result.user;
-    if(!user.email.endsWith('@nie.ac.in')){
+    if (!user.email.endsWith('@nie.ac.in')) {
       await auth.signOut();
       alert('⚠️ Login restricted to @nie.ac.in emails only.');
       return;
     }
-  }catch(e){
+  } catch (e) {
     console.error('login err', e);
     alert('Login failed. Check console for details.');
   }
 });
 
-logoutBtn.addEventListener('click', async ()=> {
-  try{ await auth.signOut(); }catch(e){ console.error('logout err', e); }
+logoutBtn.addEventListener('click', async () => {
+  try { await auth.signOut(); } catch (e) { console.error('logout err', e); }
 });
 
-auth.onAuthStateChanged(user=>{
-  if(user){
+auth.onAuthStateChanged(user => {
+  if (user) {
     currentUid = user.uid;
     userInfoEl.textContent = `${user.displayName || user.email || 'User'} • ${uidShort(currentUid)}`;
     loginBtn.style.display = 'none';
@@ -911,8 +960,8 @@ auth.onAuthStateChanged(user=>{
     userInfoEl.textContent = 'Not signed in';
     loginBtn.style.display = 'inline-block';
     logoutBtn.style.display = 'none';
-    if(sessionsUnsubscribe){ sessionsUnsubscribe(); sessionsUnsubscribe=null; }
-    if(unsubscribeMessages){ unsubscribeMessages(); unsubscribeMessages=null; }
+    if (sessionsUnsubscribe) { sessionsUnsubscribe(); sessionsUnsubscribe = null; }
+    if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
     sessions = []; currentSessionId = null; conversation = []; renderConversation([]);
     sessionsEl.innerHTML = '';
     const p = document.createElement('div');
@@ -930,11 +979,11 @@ clearChatBtn.addEventListener('click', () => clearCurrentChat());
 
 stopBtn.addEventListener('click', () => stopGeneration());
 
-sidebarCloseBtn.addEventListener('click', ()=> {
+sidebarCloseBtn.addEventListener('click', () => {
   sidebar.classList.add('closed');
   promptEl.focus();
 });
-sidebarOpenDesktop.addEventListener('click', ()=> {
+sidebarOpenDesktop.addEventListener('click', () => {
   sidebar.classList.remove('closed');
   sidebar.scrollTop = 0;
 });
@@ -957,24 +1006,24 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* Theme toggle persisted */
-function applySavedTheme(){
+function applySavedTheme() {
   const t = localStorage.getItem('unibot_theme');
-  if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
   else document.documentElement.removeAttribute('data-theme');
   updateThemeIcon();
 }
-function updateThemeIcon(){
+function updateThemeIcon() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   themeToggle.textContent = isDark ? '☀️' : '🌙';
 }
-themeToggle.addEventListener('click', ()=>{
+themeToggle.addEventListener('click', () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if(isDark){
+  if (isDark) {
     document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('unibot_theme','light');
+    localStorage.setItem('unibot_theme', 'light');
   } else {
-    document.documentElement.setAttribute('data-theme','dark');
-    localStorage.setItem('unibot_theme','dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('unibot_theme', 'dark');
   }
   updateThemeIcon();
 });
@@ -982,7 +1031,7 @@ applySavedTheme();
 
 /* Enter to send (Shift+Enter for newline) */
 promptEl.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter' && !e.shiftKey){
+  if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     sendPrompt();
   }
@@ -990,8 +1039,8 @@ promptEl.addEventListener('keydown', (e) => {
 sendBtn.addEventListener('click', sendPrompt);
 
 /* Keep scroll at bottom */
-window.addEventListener('resize', ()=> { chatbox.scrollTop = chatbox.scrollHeight; });
-window.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ sidebar.classList.add('closed'); } });
+window.addEventListener('resize', () => { chatbox.scrollTop = chatbox.scrollHeight; });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sidebar.classList.add('closed'); } });
 
 /* ========== Stop generation ========== */
 function stopGeneration() {
@@ -1006,13 +1055,13 @@ function stopGeneration() {
   }
   stopBtn.style.display = 'none';
   sendBtn.style.display = 'inline-block';
-  
+
   // Remove typing indicator
   const typingEl = document.getElementById('typingIndicator');
   if (typingEl) {
     typingEl.remove();
   }
-  
+
   // If there's a current bot message being typed, finalize it
   if (currentBotMessageEl) {
     const container = currentBotMessageEl.closest('.message-container');
@@ -1033,32 +1082,32 @@ function stopGeneration() {
 }
 
 /* ========== Typing animation (fast but natural) ========== */
-async function sendPrompt(){
+async function sendPrompt() {
   const prompt = promptEl.value.trim();
   const mode = modeSelect.value;
-  if(!prompt) return;
-  
+  if (!prompt) return;
+
   // Stop any ongoing generation
   stopGeneration();
 
   // local user message (DOM)
   let userMsgId = null;
-  if(currentUid) {
+  if (currentUid) {
     try {
       const docRef = await db.collection('users').doc(currentUid).collection('messages').add({
-        role:'user', text: prompt, sessionId: currentSessionId || 'default', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        role: 'user', text: prompt, sessionId: currentSessionId || 'default', createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       userMsgId = docRef.id;
-    } catch(e){ console.error('save user msg failed', e); }
+    } catch (e) { console.error('save user msg failed', e); }
   }
-  
-  conversation.push({ role:'user', text: prompt, createdAt: null, _id: userMsgId });
+
+  conversation.push({ role: 'user', text: prompt, createdAt: null, _id: userMsgId });
   const userEl = createMsgElement('user', prompt, userMsgId);
   chatbox.appendChild(userEl);
   chatbox.scrollTop = chatbox.scrollHeight;
 
   // ensure session id
-  if(currentUid && !currentSessionId) currentSessionId = 'default';
+  if (currentUid && !currentSessionId) currentSessionId = 'default';
 
   promptEl.value = '';
   promptEl.focus();
@@ -1068,45 +1117,45 @@ async function sendPrompt(){
   stopBtn.style.display = 'inline-block';
   sendBtn.style.display = 'none';
   isTyping = true;
-  
+
   /* ======================================================
      FEATURE: /timetable commands (DIRECT RESPONSE)
      ====================================================== */
   const promptLower = prompt.toLowerCase().trim();
-  
+
   if (promptLower === "/timetable" || promptLower === "/timetable today") {
     // remove typing indicator
     if (typingEl && typingEl.parentNode) {
       typingEl.remove();
     }
-    
+
     const botEl = createMsgElement("bot", "");
     chatbox.appendChild(botEl);
-    
+
     const reply = getTimetableForToday();
     botEl.textContent = reply;
-    
+
     // save to Firestore
     if (currentUid) saveMessage("bot", reply);
-    
+
     chatbox.scrollTop = chatbox.scrollHeight;
     return; // stop normal Gemini flow
   }
-  
+
   // /timetable <branch> [class] [day]
   if (promptLower.startsWith("/timetable ")) {
     const parts = prompt.split(" ").slice(1);
-    
+
     // remove typing indicator
     if (typingEl && typingEl.parentNode) {
       typingEl.remove();
     }
-    
+
     const botEl = createMsgElement("bot", "");
     chatbox.appendChild(botEl);
-    
+
     let reply = "";
-    
+
     if (parts.length === 1) {
       // /timetable cse
       const branch = parts[0];
@@ -1115,7 +1164,7 @@ async function sendPrompt(){
       // /timetable cse 1 or /timetable cse monday
       const branch = parts[0];
       const second = parts[1];
-      
+
       if (['1', '2'].includes(second)) {
         // It's a class number
         reply = getTimetableForToday(branch, parseInt(second));
@@ -1128,7 +1177,7 @@ async function sendPrompt(){
       const branch = parts[0];
       const classNum = parts[1];
       const day = parts[2];
-      
+
       const branchData = timetableDB[branch.toLowerCase()];
       if (!branchData) {
         reply = `⚠️ Branch "${branch}" not found. Available branches: CSE, ECE, ISE`;
@@ -1151,27 +1200,27 @@ async function sendPrompt(){
     } else {
       reply = "Usage:\n/timetable - Today's summary\n/timetable <branch> - Branch timetable\n/timetable <branch> <class> - Class timetable\n/timetable <branch> <day> - Branch timetable for day\n/timetable <branch> <class> <day> - Specific class timetable";
     }
-    
+
     botEl.textContent = reply;
-    
+
     // save to Firestore
     if (currentUid) saveMessage("bot", reply);
-    
+
     chatbox.scrollTop = chatbox.scrollHeight;
     return; // stop normal Gemini flow
   }
-  
+
   /* ======================================================
      FEATURE: /faculty <name>
      ====================================================== */
   if (promptLower.startsWith("/faculty")) {
     const parts = prompt.split(" ");
-    
+
     // remove typing indicator
     if (typingEl && typingEl.parentNode) {
       typingEl.remove();
     }
-    
+
     if (parts.length < 2) {
       const reply = "Usage: /faculty <name>\nExample: /faculty balaji";
       const botEl = createMsgElement("bot", reply);
@@ -1192,7 +1241,7 @@ async function sendPrompt(){
 
     return; // stop Gemini flow
   }
-  
+
   /* ======================================================
      FEATURE: /help - Show available commands
      ====================================================== */
@@ -1201,10 +1250,10 @@ async function sendPrompt(){
     if (typingEl && typingEl.parentNode) {
       typingEl.remove();
     }
-    
+
     const botContainer = createMsgElement("bot", "");
     chatbox.appendChild(botContainer);
-    
+
     const helpBotEl = botContainer.querySelector('.msg');
     if (!helpBotEl) {
       // Fallback if structure is different
@@ -1215,7 +1264,7 @@ async function sendPrompt(){
       chatbox.scrollTop = chatbox.scrollHeight;
       return;
     }
-    
+
     // Create formatted help message with HTML-like structure
     const helpContent = document.createElement('div');
     helpContent.className = 'help-content';
@@ -1284,42 +1333,42 @@ async function sendPrompt(){
         </div>
       </div>
     `;
-    
+
     helpBotEl.appendChild(helpContent);
-    
+
     const reply = `🤖 UniBot Commands & Features\n\n📅 Timetable Commands:\n• /timetable - Today's timetable summary\n• /timetable <branch> - Branch timetable (CSE, ECE, ISE)\n• /timetable <branch> <class> - Specific class timetable (1 or 2)\n• /timetable <branch> <day> - Branch timetable for specific day\n• /timetable <branch> <class> <day> - Complete timetable details\n\n👨‍🏫 Faculty Commands:\n• /faculty <name> - Search for faculty information\n\n💡 Examples:\n• /timetable cse\n• /timetable cse 1\n• /timetable cse 1 monday\n• /faculty balaji\n\n💬 You can also ask me anything else! I'm here to help with academic questions, study tips, and more.\n\n⌨️ Keyboard Shortcuts: Ctrl/Cmd+K (New Chat), Escape (Stop/Cancel), Enter (Send), Shift+Enter (New Line)`;
-    
+
     if (currentUid) saveMessage("bot", reply);
-    
+
     chatbox.scrollTop = chatbox.scrollHeight;
     return; // stop normal Gemini flow
   }
- 
+
 
   // call backend with abort controller
   abortController = new AbortController();
   let res;
   try {
     res = await fetch('/api/gemini', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, mode, conversation }),
       signal: abortController.signal
     });
-  } catch(e) {
+  } catch (e) {
     if (e.name === 'AbortError') {
       // Request was aborted
       return;
     }
-    if(typingEl) typingEl.textContent = 'Network error.';
+    if (typingEl) typingEl.textContent = 'Network error.';
     console.error('network err', e);
     stopGeneration();
     return;
   }
 
   let data = {};
-  try { data = await res.json(); } catch(e){ 
-    data = {}; 
+  try { data = await res.json(); } catch (e) {
+    data = {};
     stopGeneration();
     return;
   }
@@ -1329,11 +1378,11 @@ async function sendPrompt(){
 
   // replace typing indicator
   const botContainer = replaceTypingWithBot() || (() => {
-    const container = createMsgElement('bot','');
+    const container = createMsgElement('bot', '');
     chatbox.appendChild(container);
     return container;
   })();
-  
+
   const botEl = botContainer.querySelector('.msg');
   currentBotMessageEl = botEl;
 
@@ -1342,29 +1391,29 @@ async function sendPrompt(){
 
   // add to local conversation array
   let botMsgId = null;
-  const botMsgObj = { role:'bot', text:'', createdAt: null, _id: botMsgId };
+  const botMsgObj = { role: 'bot', text: '', createdAt: null, _id: botMsgId };
   conversation.push(botMsgObj);
 
   // fast but natural delays:
   // base: 7..17 ms, punctuation adds small pause
   let idx = 0;
   const total = reply.length;
-  function nextDelay(ch){
-    let base = 7 + Math.random()*10; // 7..17 ms
-    if(ch === ' ') base = base * 0.55;
-    if(ch === ',') base += 8;
-    if(ch === '\n') base += 15;
-    if(ch === '.' || ch === '!' || ch === '?') base += 35 + Math.random()*15;
+  function nextDelay(ch) {
+    let base = 7 + Math.random() * 10; // 7..17 ms
+    if (ch === ' ') base = base * 0.55;
+    if (ch === ',') base += 8;
+    if (ch === '\n') base += 15;
+    if (ch === '.' || ch === '!' || ch === '?') base += 35 + Math.random() * 15;
     return Math.round(base);
   }
 
-  function tick(){
-    if(!isTyping || idx >= total){
-      if(idx >= total && isTyping) {
+  function tick() {
+    if (!isTyping || idx >= total) {
+      if (idx >= total && isTyping) {
         // Save complete message
-        if(currentUid) {
+        if (currentUid) {
           db.collection('users').doc(currentUid).collection('messages').add({
-            role:'bot', text: botMsgObj.text, sessionId: currentSessionId, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            role: 'bot', text: botMsgObj.text, sessionId: currentSessionId, createdAt: firebase.firestore.FieldValue.serverTimestamp()
           }).then(docRef => {
             botMsgObj._id = docRef.id;
             if (botContainer) botContainer.dataset.msgId = docRef.id;
@@ -1384,14 +1433,14 @@ async function sendPrompt(){
   }
 
   // small initial delay so replacement animation shows
-  typingTimeoutId = setTimeout(()=>{
-    if(!isTyping) return;
-    if(botEl && !botEl.classList.contains('enter')) botEl.classList.add('enter');
+  typingTimeoutId = setTimeout(() => {
+    if (!isTyping) return;
+    if (botEl && !botEl.classList.contains('enter')) botEl.classList.add('enter');
     tick();
   }, 60);
 }
 
 /* debug state */
 window.__unibot = {
-  getState: ()=> ({ currentUid, currentSessionId, sessions, conversation })
+  getState: () => ({ currentUid, currentSessionId, sessions, conversation })
 };
