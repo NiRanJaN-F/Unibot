@@ -381,9 +381,12 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
   position: relative;
+  padding-top: 20px;
   animation: slideInMessage 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 40px;
+  z-index: 1;
 }
 
 @keyframes slideInMessage {
@@ -463,203 +466,149 @@ body::before {
 
 /* Message actions */
 .message-actions {
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  align-items: center;
-  margin-top: 4px;
-  transform: translateY(-4px);
   position: absolute;
-  right: 12px;
-  top: -16px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
   background: var(--panel);
-  padding: 4px 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border);
-  z-index: 10;
-}
-
-.message-container:hover .message-actions {
-  opacity: 1;
-  transform: translateY(0);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: scale(0.9);
+  pointer-events: none;
+  top: -12px;
+  will-change: transform, opacity;
 }
 
 .message-container[data-role="user"] .message-actions {
-  right: 12px;
-  left: auto;
+  right: 8px;
+  transform-origin: top right;
 }
 
 .message-container[data-role="bot"] .message-actions {
-  left: 12px;
-  right: auto;
+  left: 8px;
+  transform-origin: top left;
+}
+
+.message-container:hover .message-actions,
+.msg:hover+.message-actions,
+.message-actions:hover {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Make sure message container has relative positioning */
+.message-container {
+  position: relative;
+  padding-top: 20px;
+  margin-bottom: 24px;
+}
+
+/* Make sure messages don't overlap with actions */
+.msg {
+  position: relative;
+  z-index: 1;
 }
 
 .msg-action-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  padding: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 28px;
   height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.msg-action-btn svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
+  font-size: 14px;
 }
 
 .msg-action-btn:hover {
-  background: var(--accent);
-  color: white;
+  background: rgba(0, 0, 0, 0.05);
   transform: translateY(-1px) scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+  color: var(--text);
 }
 
 .msg-action-btn:active {
-  transform: translateY(0) scale(0.95);
+  transform: scale(0.95);
 }
 
-.msg-action-btn.regenerate-btn:hover {
-  background: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+/* Specific button styles */
+.msg-action-btn[title="Edit message"] {
+  color: #3b82f6;
 }
 
-.msg-action-btn.edit-btn:hover {
-  background: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+.msg-action-btn[title="Regenerate response"] {
+  color: #10b981;
 }
 
-.msg-action-btn.copy-btn:hover {
-  background: #8b5cf6;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+.msg-action-btn[title="Copy message"] {
+  color: #8b5cf6;
 }
 
-/* Edit message input */
-.msg-edit-input {
-  width: 100%;
-  max-width: 100%;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 2px solid var(--accent);
-  background: var(--panel);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
-  resize: vertical;
-  min-height: 100px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 12px rgba(0, 188, 212, 0.1);
+.msg-action-btn[title="Edit message"]:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-.msg-edit-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.2);
+.msg-action-btn[title="Regenerate response"]:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
-.msg-edit-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  justify-content: flex-end;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none;
-}
-
-.btn.small {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #00a3b8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 188, 212, 0.3);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-ghost:hover {
-  background: var(--panel-2);
-  transform: translateY(-1px);
+.msg-action-btn[title="Copy message"]:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
 }
 
 /* Tooltip */
-[data-tooltip] {
-  position: relative;
-}
-
-[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
+.msg-action-btn::after {
+  content: attr(title);
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  background: var(--panel);
-  color: var(--text);
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
-  pointer-events: none;
   opacity: 0;
+  pointer-events: none;
   transition: all 0.2s ease;
-  z-index: 1000;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
 }
 
-[data-tooltip]:hover::after {
+.msg-action-btn:hover::after {
   opacity: 1;
-  transform: translateX(-50%) translateY(-8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Loading spinner */
+.msg-action-btn .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+  margin: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Message timestamp */

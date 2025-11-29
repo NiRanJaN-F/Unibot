@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <title>UniBot — Modern Chat UI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/style.css">
 </head>
-
 <body>
   <div class="app" id="appRoot">
     <!-- SIDEBAR -->
@@ -35,8 +33,7 @@
       <div style="margin-top:6px;font-weight:700;color:var(--text)">Chats</div>
 
       <div id="sessions" class="sessions" aria-live="polite">
-        <div class="small no-sessions" style="padding:10px;color:var(--muted)">No chats yet — press "New Chat" to start
-        </div>
+        <div class="small no-sessions" style="padding:10px;color:var(--muted)">No chats yet — press "New Chat" to start</div>
       </div>
     </aside>
 
@@ -55,10 +52,8 @@
           <div class="meta small" id="sessionMeta">Sign in to load chats</div>
 
           <div style="margin-left:12px"></div>
-          <button id="clearChatBtn" class="btn btn-ghost small" title="Clear current chat" style="display:none;">🗑
-            Clear</button>
-          <button id="sidebarOpenDesktop" class="btn btn-ghost small" title="Open sessions" style="margin-left:auto">☰
-            Sessions</button>
+          <button id="clearChatBtn" class="btn btn-ghost small" title="Clear current chat" style="display:none;">🗑 Clear</button>
+          <button id="sidebarOpenDesktop" class="btn btn-ghost small" title="Open sessions" style="margin-left:auto">☰ Sessions</button>
         </div>
 
         <div id="chatArea" class="chatArea" role="log" aria-live="polite">
@@ -67,16 +62,14 @@
             <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);">Welcome to UniBot!</div>
             <div style="margin-bottom:16px;">Start a new chat — sign in to save your conversation.</div>
             <div style="font-size:14px;color:var(--muted-2);">
-              Try: <code style="background:var(--panel-2);padding:4px 8px;border-radius:6px;">/help</code> to see
-              available commands
+              Try: <code style="background:var(--panel-2);padding:4px 8px;border-radius:6px;">/help</code> to see available commands
             </div>
           </div>
           <div id="chatbox" style="display:flex;flex-direction:column;gap:12px;"></div>
         </div>
 
         <div class="composer">
-          <textarea id="prompt" placeholder="Ask UniBot anything... (Press Enter to send, Shift+Enter for new line)"
-            rows="2" spellcheck="false"></textarea>
+          <textarea id="prompt" placeholder="Ask UniBot anything... (Press Enter to send, Shift+Enter for new line)" rows="2" spellcheck="false"></textarea>
           <button id="stopBtn" class="stopBtn" style="display:none;" title="Stop generating">⏹ Stop</button>
           <button id="sendBtn" class="sendBtn">Send</button>
         </div>
@@ -91,5 +84,4 @@
 
   <script src="/script.js" defer></script>
 </body>
-
 </html>

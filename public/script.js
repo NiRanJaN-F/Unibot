@@ -383,66 +383,83 @@ function createMsgElement(role, text, msgId = null, timestamp = null) {
   container.dataset.role = role;
   if (msgId) container.dataset.msgId = msgId;
 
-  const msgEl = document.createElement('div');
-  msgEl.className = `msg ${role}`;
-  msgEl.textContent = text;
-  container.appendChild(msgEl);
+  const el = document.createElement('div');
+  el.className = 'msg ' + (role === 'user' ? 'user' : 'bot') + ' enter';
+  el.textContent = text || '';
 
   // Add message actions
   const actions = document.createElement('div');
   actions.className = 'message-actions';
 
   if (role === 'user') {
+    // Edit button for user messages
     const editBtn = document.createElement('button');
-    editBtn.className = 'msg-action-btn edit-btn';
-    editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
-    editBtn.setAttribute('data-tooltip', 'Edit message');
+    editBtn.className = 'msg-action-btn';
+    editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+    editBtn.title = 'Edit message';
     editBtn.onclick = (e) => {
       e.stopPropagation();
       editUserMessage(container, text);
     };
     actions.appendChild(editBtn);
-  } else {
-    const regenerateBtn = document.createElement('button');
-    regenerateBtn.className = 'msg-action-btn regenerate-btn';
-    regenerateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
-    regenerateBtn.setAttribute('data-tooltip', 'Regenerate response');
-    regenerateBtn.onclick = (e) => {
+
+    // Regenerate button for user messages
+    const regenBtn = document.createElement('button');
+    regenBtn.className = 'msg-action-btn';
+    regenBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path></svg>';
+    regenBtn.title = 'Regenerate response';
+    regenBtn.onclick = (e) => {
       e.stopPropagation();
       regenerateResponse(container);
     };
-    actions.appendChild(regenerateBtn);
+    actions.appendChild(regenBtn);
+  } else if (text && text.trim()) {
+    // Action buttons for bot messages
+    const regenBtn = document.createElement('button');
+    regenBtn.className = 'msg-action-btn';
+    regenBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path></svg>';
+    regenBtn.title = 'Regenerate response';
+    regenBtn.onclick = (e) => {
+      e.stopPropagation();
+      regenerateResponse(container);
+    };
+    actions.appendChild(regenBtn);
   }
 
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'msg-action-btn copy-btn';
-  copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
-  copyBtn.setAttribute('data-tooltip', 'Copy to clipboard');
-  copyBtn.onclick = (e) => {
-    e.stopPropagation();
-    copyToClipboard(text);
+  // Copy button for all messages
+  if (text && text.trim()) {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'msg-action-btn';
+    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    copyBtn.title = 'Copy message';
+    copyBtn.onclick = (e) => {
+      e.stopPropagation();
+      copyToClipboard(text);
+      const originalHTML = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      copyBtn.title = 'Copied!';
+      setTimeout(() => {
+        copyBtn.innerHTML = originalHTML;
+        copyBtn.title = 'Copy message';
+      }, 2000);
+    };
+    actions.appendChild(copyBtn);
+  }
 
-    // Show copied feedback
-    const originalTitle = copyBtn.getAttribute('data-tooltip');
-    copyBtn.setAttribute('data-tooltip', 'Copied!');
-    copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
-
-    setTimeout(() => {
-      copyBtn.setAttribute('data-tooltip', originalTitle);
-      copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
-    }, 2000);
-  };
-  actions.appendChild(copyBtn);
-
-  // Add timestamp if available
+  // Timestamp
   if (timestamp) {
     const timeEl = document.createElement('div');
     timeEl.className = 'message-time';
-    timeEl.textContent = fmtDateLabel(timestamp);
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    timeEl.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     container.appendChild(timeEl);
   }
 
-  container.appendChild(actions);
+  container.appendChild(el);
+  if (actions.children.length > 0) {
+    container.appendChild(actions);
+  }
+
   return container;
 }
 
@@ -453,180 +470,246 @@ function editUserMessage(container, currentText) {
   const originalText = msgEl.textContent;
   const msgId = container.dataset.msgId;
 
-  // Create input with improved styling
   const input = document.createElement('textarea');
   input.value = originalText;
   input.className = 'msg-edit-input';
+  input.style.cssText = 'width:100%;max-width:75%;padding:8px;border-radius:8px;border:2px solid var(--accent);background:var(--panel);color:var(--text);font-size:14px;resize:vertical;min-height:60px;';
 
-  // Replace message with input
-  msgEl.style.display = 'none';
-  msgEl.after(input);
+  msgEl.replaceWith(input);
+  input.focus();
+  input.select();
 
-  // Create button container
   const btnContainer = document.createElement('div');
-  btnContainer.className = 'msg-edit-buttons';
+  btnContainer.style.cssText = 'display:flex;gap:8px;margin-top:8px;max-width:75%;';
 
-  // Create save button with icon
   const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn btn-primary small';
-  saveBtn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-      <polyline points="17 21 17 13 7 13 7 21"/>
-      <polyline points="7 3 7 8 15 8"/>
-    </svg>
-    Save
-  `;
+  saveBtn.textContent = 'Save';
+  saveBtn.className = 'btn small';
 
-  // Create cancel button with icon
   const cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn btn-ghost small';
-  cancelBtn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-    Cancel
-  `;
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.className = 'btn small btn-ghost';
 
   btnContainer.appendChild(saveBtn);
   btnContainer.appendChild(cancelBtn);
 
-  // Insert buttons after input
-  input.after(btnContainer);
+  container.appendChild(btnContainer);
 
-  // Focus and select all text
-  input.focus();
-  input.select();
-
-  // Save edit function
   const saveEdit = async () => {
     const newText = input.value.trim();
-    if (newText && newText !== originalText) {
-      // Show loading state
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `
-        <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 1v3m0 16v3m9-9h-3m-16 0H1m15.4-6.4l-2.1 2.1M5.7 19.8l-2.1 2.1M18.3 5.7l2.1-2.1M5.7 5.7l-2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-          </path>
-        </svg>
-        Saving...
-      `;
+    if (!newText) {
+      // If empty, restore original message
+      input.replaceWith(msgEl);
+      btnContainer.remove();
+      return;
+    }
 
-      try {
-        // Update in Firestore
-        if (currentUid && msgId) {
-          await db.collection('users').doc(currentUid).collection('messages').doc(msgId).update({
-            text: newText,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }
+    // Show loading state
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
 
-        // Update in conversation array
-        const msgIndex = conversation.findIndex(m => m._id === msgId);
-        if (msgIndex !== -1) {
-          conversation[msgIndex].text = newText;
-        }
-
-        // Update UI
-        msgEl.textContent = newText;
-        input.remove();
-        btnContainer.remove();
-        msgEl.style.display = '';
-      } catch (e) {
-        console.error('Update failed', e);
-        saveBtn.innerHTML = 'Error! Retry';
-        saveBtn.disabled = false;
+    try {
+      // Update in Firestore
+      if (currentUid && msgId) {
+        await db.collection('users').doc(currentUid).collection('messages').doc(msgId).update({
+          text: newText,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
       }
-    } else {
-      // No changes or empty text, just cancel
-      cancelEdit();
+
+      // Update in conversation array
+      const msgIndex = conversation.findIndex(m => m._id === msgId);
+      if (msgIndex !== -1) {
+        conversation[msgIndex].text = newText;
+      }
+
+      // Update UI
+      const newMsgEl = document.createElement('div');
+      newMsgEl.className = 'msg user';
+      newMsgEl.textContent = newText;
+      input.replaceWith(newMsgEl);
+      btnContainer.remove();
+
+      // If this is a user message, regenerate the bot's response
+      if (container.dataset.role === 'user') {
+        const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
+        const currentIndex = allContainers.indexOf(container);
+        if (currentIndex !== -1) {
+          // Find and remove the bot's response
+          for (let i = allContainers.length - 1; i > currentIndex; i--) {
+            const cont = allContainers[i];
+            if (cont.dataset.role === 'bot') {
+              // Animate removal
+              cont.style.transition = 'opacity 0.2s, transform 0.2s';
+              cont.style.opacity = '0';
+              cont.style.transform = 'translateX(20px)';
+
+              // Remove after animation
+              setTimeout(() => cont.remove(), 200);
+
+              // Remove from conversation array
+              const msgIdToRemove = cont.dataset.msgId;
+              const convIndex = conversation.findIndex(m => m._id === msgIdToRemove);
+              if (convIndex !== -1) {
+                conversation.splice(convIndex, 1);
+              }
+              // Delete from Firestore
+              if (currentUid && msgIdToRemove) {
+                try {
+                  await db.collection('users').doc(currentUid).collection('messages').doc(msgIdToRemove).delete();
+                } catch (e) {
+                  console.error('Delete failed', e);
+                }
+              }
+            }
+          }
+          // Small delay before regenerating
+          setTimeout(() => {
+            promptEl.value = newText;
+            sendPrompt();
+          }, 250);
+        }
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+      // Show error state
+      saveBtn.innerHTML = 'Error! Retry';
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Save';
+      }, 2000);
     }
   };
 
-  // Cancel edit function
-  const cancelEdit = () => {
-    input.remove();
-    btnContainer.remove();
-    msgEl.style.display = '';
+  saveBtn.onclick = saveEdit;
+  cancelBtn.onclick = (e) => {
+    e.stopPropagation();
+    // Add fade out animation
+    input.style.transition = 'opacity 0.15s';
+    input.style.opacity = '0';
+    btnContainer.style.transition = 'opacity 0.15s';
+    btnContainer.style.opacity = '0';
+
+    // Remove after animation
+    setTimeout(() => {
+      input.replaceWith(msgEl);
+      btnContainer.remove();
+    }, 150);
   };
 
-  // Event listeners
-  saveBtn.onclick = saveEdit;
-  cancelBtn.onclick = cancelEdit;
-
-  // Handle keyboard shortcuts
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       saveEdit();
     } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEdit();
+      e.stopPropagation();
+      // Add fade out animation
+      input.style.transition = 'opacity 0.15s';
+      input.style.opacity = '0';
+      btnContainer.style.transition = 'opacity 0.15s';
+      btnContainer.style.opacity = '0';
+
+      // Remove after animation
+      setTimeout(() => {
+        input.replaceWith(msgEl);
+        btnContainer.remove();
+      }, 150);
     }
   });
-
-  // Close on click outside
-  const handleClickOutside = (e) => {
-    if (!input.contains(e.target) && !btnContainer.contains(e.target)) {
-      cancelEdit();
-      document.removeEventListener('click', handleClickOutside);
-    }
-  };
-
-  // Add slight delay to prevent immediate close when clicking the edit button
-  setTimeout(() => {
-    document.addEventListener('click', handleClickOutside);
-  }, 100);
 }
 
 async function regenerateResponse(container) {
-  // Find the user message before this bot response
-  const msgId = container.dataset.msgId;
-  if (!msgId) {
-    // Try to find by position in DOM
-    const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
-    const currentIndex = allContainers.indexOf(container);
-    if (currentIndex === -1 || currentIndex === 0) return;
+  // Show loading state
+  const regenBtn = container.querySelector('.msg-action-btn[title="Regenerate response"]');
+  if (regenBtn) {
+    const originalHTML = regenBtn.innerHTML;
+    regenBtn.innerHTML = '<span class="spinner"></span>';
+    regenBtn.style.opacity = '0.7';
+    regenBtn.style.pointerEvents = 'none';
 
-    // Find previous user message
-    let userIndex = currentIndex - 1;
-    while (userIndex >= 0 && allContainers[userIndex].dataset.role !== 'user') {
-      userIndex--;
-    }
-    if (userIndex === -1) return;
+    try {
+      // Find the user message before this bot response
+      const msgId = container.dataset.msgId;
+      const allContainers = Array.from(chatbox.querySelectorAll('.message-container'));
+      const currentIndex = allContainers.indexOf(container);
 
-    const userContainer = allContainers[userIndex];
-    const userMsgEl = userContainer.querySelector('.msg');
-    if (!userMsgEl) return;
+      if (currentIndex === -1 || currentIndex === 0) return;
 
-    const userPrompt = userMsgEl.textContent;
+      // Find previous user message
+      let userIndex = currentIndex - 1;
+      while (userIndex >= 0 && allContainers[userIndex].dataset.role !== 'user') {
+        userIndex--;
+      }
+      if (userIndex === -1) return;
 
-    // Remove current bot message and any messages after it
-    const removeIndex = currentIndex;
-    for (let i = allContainers.length - 1; i >= removeIndex; i--) {
-      const cont = allContainers[i];
-      if (cont.dataset.msgId) {
-        const convIndex = conversation.findIndex(m => m._id === cont.dataset.msgId);
+      const userContainer = allContainers[userIndex];
+      const userMsgEl = userContainer.querySelector('.msg');
+      if (!userMsgEl) return;
+
+      const userPrompt = userMsgEl.textContent;
+      const userMsgId = userContainer.dataset.msgId;
+
+      // Remove current bot message and any messages after it
+      const removeIndex = currentIndex;
+      const messagesToDelete = [];
+
+      for (let i = allContainers.length - 1; i >= removeIndex; i--) {
+        const cont = allContainers[i];
+        if (cont.dataset.msgId) {
+          messagesToDelete.push({
+            id: cont.dataset.msgId,
+            element: cont
+          });
+        }
+      }
+
+      // Animate removal
+      for (const msg of messagesToDelete) {
+        msg.element.style.transition = 'opacity 0.2s, transform 0.2s';
+        msg.element.style.opacity = '0';
+        msg.element.style.transform = 'translateX(20px)';
+      }
+
+      // Wait for animation to complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Remove from DOM and Firestore
+      for (const msg of messagesToDelete) {
+        // Remove from conversation array
+        const convIndex = conversation.findIndex(m => m._id === msg.id);
         if (convIndex !== -1) {
           conversation.splice(convIndex, 1);
         }
+        // Delete from Firestore
         if (currentUid) {
           try {
-            await db.collection('users').doc(currentUid).collection('messages').doc(cont.dataset.msgId).delete();
+            await db.collection('users').doc(currentUid).collection('messages').doc(msg.id).delete();
           } catch (e) {
             console.error('Delete failed', e);
           }
         }
+        msg.element.remove();
       }
-      cont.remove();
-    }
 
-    // Resend the prompt
-    promptEl.value = userPrompt;
-    sendPrompt();
-    return;
+      // Resend the prompt
+      promptEl.value = userPrompt;
+      sendPrompt();
+    } catch (error) {
+      console.error('Regeneration failed:', error);
+      // Show error state briefly
+      regenBtn.innerHTML = '❌';
+      setTimeout(() => {
+        regenBtn.innerHTML = originalHTML;
+        regenBtn.style.opacity = '';
+        regenBtn.style.pointerEvents = '';
+      }, 1000);
+    } finally {
+      if (regenBtn.innerHTML.includes('spinner')) {
+        regenBtn.innerHTML = originalHTML;
+        regenBtn.style.opacity = '';
+        regenBtn.style.pointerEvents = '';
+      }
+    }
   }
 
   const msgIndex = conversation.findIndex(m => m._id === msgId);
